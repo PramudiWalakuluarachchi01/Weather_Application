@@ -1,14 +1,58 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:weather_app_01/additional_info_item.dart';
 import 'package:weather_app_01/hourly_forecast_item.dart';
 
-class WeatherScreen extends StatelessWidget {
+import 'package:http/http.dart' as http;
+import 'package:weather_app_01/secrets.dart';
+
+class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
 
   @override
+  State<WeatherScreen> createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends State<WeatherScreen> {
+  late double temp;
+  @override
+  void initState() {
+    super.initState();
+    print('initState');
+    getCurrentWeather();
+  }
+
+  Future getCurrentWeather() async {
+    // Implement  API call here to fetch current weather data
+    print('fn called');
+
+    try {
+      String cityName = "London";
+      final res = await http.get(
+        Uri.parse(
+          'https://api.openweathermap.org/data/2.5/forecast?q=$cityName&APPID=$openWeatherAPIKey',
+        ),
+      );
+      print('api ended');
+
+      final data = jsonDecode(res.body);
+
+      if (data['cod'] != '200') {
+        throw 'An unexpected error occured'; // Handle error case here if needed
+      }
+
+      temp = data['list'][0]['main']['temp'];
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+        print('build fn called');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -42,23 +86,23 @@ class WeatherScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
                           Text(
-                            '300°F',
-                            style: TextStyle(
+                            '$temp K',
+                            style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 8),
-                          Icon(Icons.cloud, size: 64),
+                          const SizedBox(height: 8),
+                          const Icon(Icons.cloud, size: 64),
 
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
 
-                          Text('Rain', style: TextStyle(fontSize: 20)),
+                          const Text('Rain', style: TextStyle(fontSize: 20)),
                         ],
                       ),
                     ),
@@ -76,15 +120,35 @@ class WeatherScreen extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  HourlyForecastItem(),
+                  HourlyForecastItem(
+                    time: '03.03',
+                    icon: Icons.cloud,
+                    temperature: '320.12',
+                  ),
 
-                  HourlyForecastItem(),
+                  HourlyForecastItem(
+                    time: '04.03',
+                    icon: Icons.wb_sunny,
+                    temperature: '322.15',
+                  ),
 
-                  HourlyForecastItem(),
+                  HourlyForecastItem(
+                    time: '05.03',
+                    icon: Icons.grain,
+                    temperature: '319.11',
+                  ),
 
-                  HourlyForecastItem(),
+                  HourlyForecastItem(
+                    time: '06.03',
+                    icon: Icons.ac_unit,
+                    temperature: '315.09',
+                  ),
 
-                  HourlyForecastItem(),
+                  HourlyForecastItem(
+                    time: '07.03',
+                    icon: Icons.wb_cloudy,
+                    temperature: '318.13',
+                  ),
                 ],
               ),
             ),
@@ -100,9 +164,21 @@ class WeatherScreen extends StatelessWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  AdditionalInfoItem(),
-                  AdditionalInfoItem(),
-                  AdditionalInfoItem(),
+                  AdditionalInfoItem(
+                    icon: Icons.water_drop,
+                    label: 'Humidity',
+                    value: '60%',
+                  ),
+                  AdditionalInfoItem(
+                    icon: Icons.air,
+                    label: 'Wind Speed',
+                    value: '15 km/h',
+                  ),
+                  AdditionalInfoItem(
+                    icon: Icons.thermostat,
+                    label: 'Pressure',
+                    value: '1013 hPa',
+                  ),
                 ],
               ),
             ),
