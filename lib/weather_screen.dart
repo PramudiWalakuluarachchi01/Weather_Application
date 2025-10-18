@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:weather_app_01/additional_info_item.dart';
 import 'package:weather_app_01/hourly_forecast_item.dart';
-
-import 'package:http/http.dart' as http;
 import 'package:weather_app_01/secrets.dart';
 
 class WeatherScreen extends StatefulWidget {
@@ -16,17 +15,15 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  late double temp;
+  double temp = 0;
   @override
   void initState() {
     super.initState();
-    print('initState');
     getCurrentWeather();
   }
 
   Future getCurrentWeather() async {
     // Implement  API call here to fetch current weather data
-    print('fn called');
 
     try {
       String cityName = "London";
@@ -35,7 +32,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
           'https://api.openweathermap.org/data/2.5/forecast?q=$cityName&APPID=$openWeatherAPIKey',
         ),
       );
-      print('api ended');
 
       final data = jsonDecode(res.body);
 
@@ -43,7 +39,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
         throw 'An unexpected error occured'; // Handle error case here if needed
       }
 
-      temp = data['list'][0]['main']['temp'];
+      setState(() {
+        temp = data['list'][0]['main']['temp'];
+      });
     } catch (e) {
       throw e.toString();
     }
@@ -51,8 +49,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
-        print('build fn called');
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -69,122 +65,127 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //main card
-            SizedBox(
-              width: double.infinity,
-              child: Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            '$temp K',
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+      body: temp == 0
+          ? const CircularProgressIndicator()
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //main card
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  '$temp K',
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Icon(Icons.cloud, size: 64),
+
+                                const SizedBox(height: 8),
+
+                                const Text(
+                                  'Rain',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          const Icon(Icons.cloud, size: 64),
-
-                          const SizedBox(height: 8),
-
-                          const Text('Rain', style: TextStyle(fontSize: 20)),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Weather Forecast',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 14),
-            const SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  HourlyForecastItem(
-                    time: '03.03',
-                    icon: Icons.cloud,
-                    temperature: '320.12',
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Weather Forecast',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 14),
+                  const SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        HourlyForecastItem(
+                          time: '03.03',
+                          icon: Icons.cloud,
+                          temperature: '320.12',
+                        ),
 
-                  HourlyForecastItem(
-                    time: '04.03',
-                    icon: Icons.wb_sunny,
-                    temperature: '322.15',
+                        HourlyForecastItem(
+                          time: '04.03',
+                          icon: Icons.wb_sunny,
+                          temperature: '322.15',
+                        ),
+
+                        HourlyForecastItem(
+                          time: '05.03',
+                          icon: Icons.grain,
+                          temperature: '319.11',
+                        ),
+
+                        HourlyForecastItem(
+                          time: '06.03',
+                          icon: Icons.ac_unit,
+                          temperature: '315.09',
+                        ),
+
+                        HourlyForecastItem(
+                          time: '07.03',
+                          icon: Icons.wb_cloudy,
+                          temperature: '318.13',
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(height: 14),
 
-                  HourlyForecastItem(
-                    time: '05.03',
-                    icon: Icons.grain,
-                    temperature: '319.11',
+                  //aditional info
+                  const Text(
+                    'Additional Information',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-
-                  HourlyForecastItem(
-                    time: '06.03',
-                    icon: Icons.ac_unit,
-                    temperature: '315.09',
-                  ),
-
-                  HourlyForecastItem(
-                    time: '07.03',
-                    icon: Icons.wb_cloudy,
-                    temperature: '318.13',
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        AdditionalInfoItem(
+                          icon: Icons.water_drop,
+                          label: 'Humidity',
+                          value: '60%',
+                        ),
+                        AdditionalInfoItem(
+                          icon: Icons.air,
+                          label: 'Wind Speed',
+                          value: '15 km/h',
+                        ),
+                        AdditionalInfoItem(
+                          icon: Icons.thermostat,
+                          label: 'Pressure',
+                          value: '1013 hPa',
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-
-            //aditional info
-            const Text(
-              'Additional Information',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 14),
-            Expanded(
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  AdditionalInfoItem(
-                    icon: Icons.water_drop,
-                    label: 'Humidity',
-                    value: '60%',
-                  ),
-                  AdditionalInfoItem(
-                    icon: Icons.air,
-                    label: 'Wind Speed',
-                    value: '15 km/h',
-                  ),
-                  AdditionalInfoItem(
-                    icon: Icons.thermostat,
-                    label: 'Pressure',
-                    value: '1013 hPa',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
