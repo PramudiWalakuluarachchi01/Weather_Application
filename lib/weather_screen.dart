@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:weather_app_01/additional_info_item.dart';
 import 'package:weather_app_01/hourly_forecast_item.dart';
 import 'package:weather_app_01/secrets.dart';
@@ -15,7 +16,10 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  Future<Map<String, dynamic>> getCurrentWeather() async {
+  late Future<Map<String, dynamic>> weather;
+
+
+   Future<Map<String, dynamic>> getCurrentWeather() async {
     // Implement  API call here to fetch current weather data
 
     try {
@@ -38,6 +42,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
       throw e.toString();
     }
   }
+@override
+  void initState() {
+    super.initState();
+    weather = getCurrentWeather();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +62,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               // Refresh weather data
+              setState(() {
+                weather = getCurrentWeather();
+              });
             },
           ),
         ],
       ),
       body: FutureBuilder(
-        future: getCurrentWeather(),
+        future: weather,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator.adaptive());
@@ -105,9 +117,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                               Icon(
-                                currentSky== 'Clouds'|| currentSky=='Rain'? Icons.cloud : Icons.sunny, 
-                                size: 64),
+                              Icon(
+                                currentSky == 'Clouds' || currentSky == 'Rain'
+                                    ? Icons.cloud
+                                    : Icons.sunny,
+                                size: 64,
+                              ),
 
                               const SizedBox(height: 8),
 
@@ -128,42 +143,56 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 14),
-                const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      HourlyForecastItem(
-                        time: '03.03',
-                        icon: Icons.cloud,
-                        temperature: '320.12',
-                      ),
 
-                      HourlyForecastItem(
-                        time: '04.03',
-                        icon: Icons.wb_sunny,
-                        temperature: '322.15',
-                      ),
-
-                      HourlyForecastItem(
-                        time: '05.03',
-                        icon: Icons.grain,
-                        temperature: '319.11',
-                      ),
-
-                      HourlyForecastItem(
-                        time: '06.03',
-                        icon: Icons.ac_unit,
-                        temperature: '315.09',
-                      ),
-
-                      HourlyForecastItem(
-                        time: '07.03',
-                        icon: Icons.wb_cloudy,
-                        temperature: '318.13',
-                      ),
-                    ],
+                // SingleChildScrollView(
+                //   scrollDirection: Axis.horizontal,
+                //   child: Row(
+                //     children: [
+                //       for (int i = 0; i < 10; i++)
+                //         HourlyForecastItem(
+                //           time: data['list'][i + 1]['dt_txt']
+                //               .toString()
+                //               .substring(11, 16),
+                //           icon:
+                //               data['list'][i + 1]['weather'][0]['main'] ==
+                //                       'Clouds' ||
+                //                   data['list'][i + 1]['weather'][0]['main'] ==
+                //                       'Rain'
+                //               ? Icons.cloud
+                //               : Icons.sunny,
+                //           temperature: data['list'][i + 1]['main']['temp']
+                //               .toString(),
+                //         ),
+                //     ],
+                //   ),
+                // ),
+                SizedBox(
+                  height: 130,
+                  child: ListView.builder(
+                    itemCount: 10,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final hourlyForecast = data['list'][index + 1];
+                      final hourlySky =
+                          data['list'][index + 1]['weather'][0]['main'];
+                      final hourlyTemp = hourlyForecast['main']['temp']
+                          .toString();
+                          final time = DateTime.parse(hourlyForecast['dt_txt']);
+                      return HourlyForecastItem(
+                        time:DateFormat.j().format(time), 
+                        temperature: hourlyTemp,
+                        icon:
+                            data['list'][index + 1]['weather'][0]['main'] ==
+                                    'Clouds' ||
+                                data['list'][index + 1]['weather'][0]['main'] ==
+                                    'Rain'
+                            ? Icons.cloud
+                            : Icons.sunny,
+                      );
+                    },
                   ),
                 ),
+
                 const SizedBox(height: 14),
 
                 //aditional info
@@ -173,7 +202,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
                 const SizedBox(height: 14),
                 Expanded(
-                  child:  Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       AdditionalInfoItem(
