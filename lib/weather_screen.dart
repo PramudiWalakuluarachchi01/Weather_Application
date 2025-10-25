@@ -177,15 +177,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           data['list'][index + 1]['weather'][0]['main'];
                       final hourlyTemp = hourlyForecast['main']['temp']
                           .toString();
-                          final time = DateTime.parse(hourlyForecast['dt_txt']);
+                      final time = DateTime.parse(hourlyForecast['dt_txt']);
                       return HourlyForecastItem(
-                        time:DateFormat.j().format(time), 
+                        time: DateFormat.j().format(time),
                         temperature: hourlyTemp,
-                        icon:
-                            data['list'][index + 1]['weather'][0]['main'] ==
-                                    'Clouds' ||
-                                data['list'][index + 1]['weather'][0]['main'] ==
-                                    'Rain'
+                        icon: hourlySky == 'Clouds' || hourlySky == 'Rain'
                             ? Icons.cloud
                             : Icons.sunny,
                       );
