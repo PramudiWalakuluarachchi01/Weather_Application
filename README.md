@@ -18,7 +18,7 @@ A Flutter mobile application that provides real-time weather information and hou
 
 ---
 
-![image alt](https://github.com/PramudiWalakuluarachchi01/Weather_Application/blob/ba6762c1fc3a1e9071ecb14142398b821bd385c7/weather_app_01.png)
+<img src="https://github.com/PramudiWalakuluarachchi01/Weather_Application/blob/ba6762c1fc3a1e9071ecb14142398b821bd385c7/weather_app_01.png" width=500 height=350>
 
 ## Tech Stack
 
@@ -32,5 +32,6 @@ A Flutter mobile application that provides real-time weather information and hou
 
 ```bash
 git clone https://github.com/PramudiWalakuluarachchi01/Weather_Application.git
+
 
 
